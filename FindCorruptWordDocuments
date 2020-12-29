@@ -1,0 +1,39 @@
+#Instance of word
+$Word=NEW-Object –comobject Word.Application
+$Word.visible = $False
+
+
+$allDirectories = @()
+$baseDirectory = "\\ServerPath\"
+$accounts = Get-ChildItem $baseDirectory  -Directory
+foreach($acct in $accounts){
+    $dirJanPath = [System.IO.Path]::Combine($baseDirectory, $acct, "2020-06")
+    $dirFebPath = [System.IO.Path]::Combine($baseDirectory, $acct, "2020-07")
+    $allDirectories+=$dirJanPath
+    $allDirectories+=$dirFebPath
+}
+foreach($a in $allDirectories){
+    if(Test-Path $a){
+    Write-Host "Do work on " $a
+
+#take list of .docx
+
+Get-ChildItem "$a" -file -Filter "*.doc"| %{
+
+$Filename=$_.FullName
+
+#open file and take content of word file
+$Document=$Word.documents.open($Filename, $false, $true)
+$range = $document.content
+
+#if content have your word, print path of word file
+If($range.Text -like "*<div>*"){
+    $Filename
+}
+
+$word.Documents.Close($true)
+
+} 
+
+    }
+}
