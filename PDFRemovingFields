@@ -1,0 +1,41 @@
+cense can be found in OneNote Article Title - PDF Powershell Script to update fonts on form fields
+
+$root="C:\Users\amendoza\source\repos\SurgicalNotes.PowerShell.Scripts\"
+$aspose = $root+"Aspose.PDF.dll"
+$asposeLicense = $root+"Aspose.Total.lic"
+Add-Type -Path $aspose
+
+[Aspose.Pdf.License]$asposePdfLicense = New-Object "Aspose.Pdf.License"
+$asposePdfLicense.SetLicense($asposeLicense)
+
+$targetDirectory="C:\Users\amendoza\Desktop\Testing5"
+$pdfs = Get-ChildItem -Path $targetDirectory -Filter "*.pdf"
+foreach($file in $pdfs){
+    Write-Host $file.FullName
+    $dir=[System.IO.Path]::GetDirectoryName($file.FullName)
+    $newdir=[System.IO.Path]::Combine($dir,"New")
+    if(-Not (Test-Path $newDir)){
+        New-Item -Path $newDir -ItemType Directory
+    }
+    $newFilePath = [System.IO.Path]::Combine($newdir,$file.Name)
+    Write-Host $newFilePath
+
+    [Aspose.Pdf.Document]$pdf = New-Object Aspose.Pdf.Document($file.FullName)
+    [Aspose.Pdf.Facades.Form]$form = New-Object Aspose.Pdf.Facades.Form($file.FullName)
+    $fields = $form.FieldNames
+    
+    [Aspose.Pdf.Facades.FormEditor]$form = New-Object Aspose.Pdf.Facades.FormEditor($file.FullName, $newFilePath)
+
+
+    foreach($field in $fields){
+        Write-Host $field
+        if($field.Contains("VisitImageId.Encoded")){
+            [Aspose.Pdf.Facades.FormFieldFacade]$facade = New-Object "Aspose.Pdf.Facades.FormFieldFacade"
+            $form.RemoveField()
+            
+        }
+        
+    }
+
+    $form.Save();
+}
